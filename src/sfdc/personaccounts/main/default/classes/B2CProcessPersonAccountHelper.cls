@@ -22,25 +22,23 @@ public with sharing class B2CProcessPersonAccountHelper {
         Account newPersonAccount;
         Account oldPersonAccount;
         Contact validateContact;
-        Contact publishContact;
         Map<String, B2C_Instance__c> instanceMap;
         Map<String, B2C_CustomerList__c> customerListMap;
         B2CIAValidateContactInput validateContactInput;
         B2CIAValidateContactResult validateContactResult;
-        List<B2C_Integration_Field_Mappings__mdt> fieldMappings;
-        List<B2C_Integration_Field_Mappings__mdt> contactFieldMappings;
-        List<B2C_Integration_Field_Mappings__mdt> updatedFieldMappings;
-        List<B2C_Integration_Field_Mappings__mdt> publishFieldMappings;
+        List<B2C_Integration_Field_Mappings__mdt> contactFieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing('Contact', false);
+        List<B2C_Integration_Field_Mappings__mdt> accountFieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing('Account', true);
+        List<B2C_Integration_Field_Mappings__mdt> updatedFieldMappingsContact;
+        List<B2C_Integration_Field_Mappings__mdt> updatedFieldMappingsAccount;
         Map<String, Object> thisB2CProfile;
         String thisB2CProfileJSON;
         List<B2C_Commerce_ProcessCustomerDetails__e> peCollection;
 
         // Get the fieldMappings for the customerProfile object
-        contactFieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing('Contact');
-        fieldMappings = B2CMetaFieldMappings.toggleAlternateObjectAttributes(contactFieldMappings);
+        contactFieldMappings = B2CMetaFieldMappings.toggleAlternateObjectAttributes(contactFieldMappings);
 
         // Only process the trigger if publish-friendly fieldMappings are found
-        if (fieldMappings.size() > 0) {
+        if (contactFieldMappings.size() > 0 || accountFieldMappings.size() > 0) {
 
             // Initialize the instance maps
             instanceMap = new Map<String, B2C_Instance__c>();
@@ -103,19 +101,24 @@ public with sharing class B2CProcessPersonAccountHelper {
                 if (validateContactResult.allowIntegrationProcess == false) { continue; }
 
                 // Determine if this Contact been updated through one of the publish fieldMappings
-                updatedFieldMappings = B2CProcessContactHelper.getUpdatedFieldMappings(oldPersonAccount, newPersonAccount, fieldMappings);
+                updatedFieldMappingsContact = B2CProcessContactHelper.getUpdatedFieldMappings(oldPersonAccount, newPersonAccount, contactFieldMappings);
+                updatedFieldMappingsAccount = B2CProcessContactHelper.getUpdatedFieldMappings(oldPersonAccount, newPersonAccount, accountFieldMappings);
 
-                // Has the Contact record been updated?
-                if (updatedFieldMappings.size() > 0) {
+                System.debug(LoggingLevel.DEBUG, '--> Updated field mappings for contact (' + updatedFieldMappingsContact.size() + ')');
+                System.debug(LoggingLevel.DEBUG, '--> Updated field mappings for account (' + updatedFieldMappingsAccount.size() + ')');
 
-                    // Toggle the fieldMappings back to the Contact so we can use them for the publishEvent
-                    publishFieldMappings = B2CMetaFieldMappings.toggleAlternateObjectAttributes(updatedFieldMappings);
+                // Has the PersonAccount record been updated?
+                if (updatedFieldMappingsContact.size() > 0 || updatedFieldMappingsAccount.size() > 0) {
 
-                    // Generate a contact-representation of the Account that only includes publishable fields
-                    publishContact = B2CAccountManager.getPublishContact(newPersonAccount, updatedFieldMappings);
-
-                    // If so, get the field-specific updates for the updated contact
-                    thisB2CProfile = B2CContactManager.getPublishProfile(publishContact, publishFieldMappings);
+                    // If so, get the field-specific updates for the updated person account
+                    thisB2CProfile = B2CContactAccountManager.getPublishProfile(
+                        newPersonAccount,
+                        updatedFieldMappingsAccount,
+                        B2CContactManager.getPublishProfile(
+                            B2CAccountManager.getPublishContact(newPersonAccount, updatedFieldMappingsContact),
+                            B2CMetaFieldMappings.toggleAlternateObjectAttributes(updatedFieldMappingsContact)
+                        )
+                    );
                     thisB2CProfileJSON = JSON.serializePretty(thisB2CProfile, true);
 
                     // Then create the Contact Publish Platform Event and override the publish JSON

@@ -122,10 +122,11 @@ public with sharing class B2CMetaFieldMappings extends B2CBaseMeta {
      * active field mappings for a given Salesforce object that support API retrieval.
      *
      * @param objectType {String} Represents the name / type of the Salesforce object whose
+     * @param allowForEmpty {Boolean} Allow for empty result collection
      * field-mappings are being retrieved
      * @return List<B2C_Integration_Field_Mappings__mdt> Returns a collection of field mappings
      */
-    public static List<B2C_Integration_Field_Mappings__mdt> getFieldMappingsForRetrieval(String objectType) {
+    public static List<B2C_Integration_Field_Mappings__mdt> getFieldMappingsForRetrieval(String objectType, Boolean allowForEmpty) {
 
         // Initialize local variables
         List<B2C_Integration_Field_Mappings__mdt> outputFieldMappings;
@@ -154,7 +155,9 @@ public with sharing class B2CMetaFieldMappings extends B2CBaseMeta {
         ];
 
         // Were any records returned by this query?
-        testForEmptyRecordSet(outputFieldMappings.size(), errorMsg);
+        if (allowForEmpty == false) {
+            testForEmptyRecordSet(outputFieldMappings.size(), errorMsg);
+        }
 
         // Return the field-mapping values
         return outputFieldMappings;
@@ -213,10 +216,11 @@ public with sharing class B2CMetaFieldMappings extends B2CBaseMeta {
      * can be published to B2C Commerce
      *
      * @param objectType {String} Represents the name / type of the Salesforce object
+     * @param allowForEmpty {Boolean} Allow for empty result collection
      * whose field-mappings are being retrieved
      * @return List<B2C_Integration_Field_Mappings__mdt> Returns a collection of field mappings
      */
-    public static List<B2C_Integration_Field_Mappings__mdt> getFieldMappingsForPublishing(String objectType) {
+    public static List<B2C_Integration_Field_Mappings__mdt> getFieldMappingsForPublishing(String objectType, Boolean allowForEmpty) {
 
         // Initialize local variables
         List<B2C_Integration_Field_Mappings__mdt> outputFieldMappings;
@@ -247,7 +251,9 @@ public with sharing class B2CMetaFieldMappings extends B2CBaseMeta {
         ];
 
         // Were any records returned by this query?
-        testForEmptyRecordSet(outputFieldMappings.size(), errorMsg);
+        if (allowForEmpty == false) {
+            testForEmptyRecordSet(outputFieldMappings.size(), errorMsg);
+        }
 
         // Return the field-mapping values
         return outputFieldMappings;

@@ -29,8 +29,8 @@ global with sharing class B2CDataSourceAddressBookConnection extends DataSource.
      * create the datasourceConnection for B2C Commerce addressBooks
      */
     global B2CDataSourceAddressBookConnection(DataSource.ConnectionParams connectionParams) {
-        this.retrievalFieldMappings = B2CMetaFieldMappings.getFieldMappingsForRetrieval(this.tableName + '__x');
-        this.publishingFieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing(this.tableName + '__x');
+        this.retrievalFieldMappings = B2CMetaFieldMappings.getFieldMappingsForRetrieval(this.tableName + '__x', false);
+        this.publishingFieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing(this.tableName + '__x', false);
         this.indirectLookupTargetObject = B2CConfigurationManager.getDefaultAccountContactModel() ==
             B2CConstant.ACCOUNTCONTACTMODEL_PERSON ? 'Account' : 'Contact';
     }

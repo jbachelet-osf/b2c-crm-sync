@@ -35,6 +35,133 @@ public class B2CIACustomerResolutionPA_Test {
 
     }
 
+    @IsTest
+    private static void testResolveFailure() {
+
+        // Initialize local variables
+        List<B2CIACustomerResolutionResult> resolutionResults;
+        List<List<Account>> testAccounts;
+
+        Test.startTest();
+
+            // Initialize the testContacts collection
+            testAccounts = new List<List<Account>>();
+
+            // Attempt to resolve the empty resultSet
+            resolutionResults = B2CIACustomerResolutionPA.resolve(testAccounts);
+
+        Test.stopTest();
+
+        // Iterate over the collection of resolutionResults
+        for (B2CIACustomerResolutionResult thisResult: resolutionResults) {
+
+            // Validate than an error was thrown by the resolveMethod
+            System.assert(thisResult.isError, 'Expected an error to be thrown as no sourceContacts were passed to the resolve() method');
+
+        }
+
+    }
+
+
+
+    @IsTest
+    private static void testResolveFailureDueToMissingAccounts() {
+
+        // Initialize local variables
+        List<B2CIACustomerResolutionResult> resolutionResults;
+        List<List<Account>> testAccounts;
+
+        Test.startTest();
+
+            // Initialize the testContacts collection
+            testAccounts = new List<List<Account>>();
+            testAccounts.add(new List<Account>());
+
+            // Attempt to resolve the empty resultSet
+            resolutionResults = B2CIACustomerResolutionPA.resolve(testAccounts);
+
+        Test.stopTest();
+
+        // Iterate over the collection of resolutionResults
+        for (B2CIACustomerResolutionResult thisResult: resolutionResults) {
+
+            // Validate than an error was thrown by the resolveMethod
+            System.assert(thisResult.isError, 'Expected an error to be thrown as no sourceContacts were passed to the resolve() method');
+
+        }
+
+    }
+
+    /**
+     * @see B2CIACustomerResolution.resolve
+     * @description
+     * Given: Existing person account with a last name, email, customer id
+     *  When: We resolve with a customer with a different last name, email, but same customer id
+     *  Then: We will be returned the existing person account
+     **/
+    @IsTest
+    static void resolvesCustomerIdFailureWithPA() {
+        // Create the test / parent Account
+        Account account = (Account)TestDataFactory.createSObject('Account', new Map<String,Object>{
+            'PersonEmail' => 'differntemail@email.com',
+            'LastName' => 'DifferentLastName',
+            'B2C_Customer_ID__pc' => 'customerid',
+            'RecordTypeId' => B2CIACustomerResolution_TestHelper.getRecordType(B2CConfigurationManager.getPersonAccountRecordTypeDeveloperName()).Id
+        });
+
+        // Create the childContact
+        Account a1 = new Account(
+            PersonEmail = 'email@email.com',
+            LastName = 'LastName',
+            B2C_Customer_ID__pc = 'customerid',
+            RecordTypeId = B2CIACustomerResolution_TestHelper.getRecordType(B2CConfigurationManager.getPersonAccountRecordTypeDeveloperName()).Id
+        );
+
+        // Create the local working variables
+        List<B2CIACustomerResolutionResult> contactResolvedList = new List<B2CIACustomerResolutionResult>();
+        List<Contact> contactFilteredList = new List<Contact>();
+        List<Account> resolutionAccountList = new List<Account>();
+        List<List<Account>> resolutionArguments = new List<List<Account>>();
+
+        Test.startTest();
+
+            // Initialize the resolution arguments
+            resolutionAccountList.add(a1);
+            resolutionArguments.add(resolutionAccountList);
+
+            // Create the list of resolved contacts
+            contactResolvedList = B2CIACustomerResolutionPA.resolve(resolutionArguments);
+
+            // Default the working collections leveraged by the resolution / filter process
+            B2CIACustomerResolutionResult resolutionResults = contactResolvedList.get(0);
+            Map<String, Object> contactFilterMap = new Map<String, Object>();
+
+            // Add the matches to the flowArguments
+            contactFilterMap.put(
+                'ContactMatches',
+                resolutionResults.contactList
+            );
+
+            // Create the flow interview to process the arguments
+            Flow.Interview.B2CCommerce_Process_ContactFilterMatches contactFilterMatchFlow =
+                new Flow.Interview.B2CCommerce_Process_ContactFilterMatches(contactFilterMap);
+
+            // Start the flow
+            contactFilterMatchFlow.start();
+
+            // Retrieve the list of filtered contacts
+            contactFilteredList = (List<Contact>)(contactFilterMatchFlow.getVariableValue('ContactMatchesResult'));
+
+        Test.stopTest();
+
+        // Validate that our contact was matched-up
+        System.assertEquals(
+            contactFilteredList,
+            null
+        );
+
+    }
+
     /**
      * @see B2CIACustomerResolution.resolve
      * @description

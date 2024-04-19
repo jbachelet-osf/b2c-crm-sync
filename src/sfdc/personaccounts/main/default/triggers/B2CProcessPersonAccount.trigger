@@ -19,6 +19,9 @@ trigger B2CProcessPersonAccount on Account (before update) {
 
         }
 
-    } catch (Exception e) {}
+    } catch (Exception e) {
+        // Audit that an error was caught
+        System.debug(System.LoggingLevel.ERROR, '--> B2C Exception: ' + e.getMessage());
+    }
 
 }

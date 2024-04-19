@@ -161,7 +161,7 @@
                 <leftValueReference>CurrentCustomerList_Loop.B2C_Client_ID__c</leftValueReference>
                 <operator>EqualTo</operator>
                 <rightValue>
-                    <stringValue/>
+                    <stringValue></stringValue>
                 </rightValue>
             </conditions>
             <conditions>

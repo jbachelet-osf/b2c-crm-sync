@@ -47,6 +47,8 @@ public with sharing class B2CConstant {
             '[{0}]; please verify that this storefront is defined and active.',
         ERRORS_META_CONTACTNOTFOUND = '--> B2C MetaData --> No Contact found mapped to Id [{0}]; please verify that ' +
             'this Contact record is defined.',
+        ERRORS_META_ACCOUNTNOTFOUND = '--> B2C MetaData --> No Account found mapped to Id [{0}]; please verify that ' +
+            'this Account record is defined.',
 
         // Define the account / contact short-hand model names and mapping objects
         ACCOUNTCONTACTMODEL_STANDARD = 'Standard',

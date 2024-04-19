@@ -28,7 +28,7 @@
             <assignToReference>thisSite.B2C_Client_ID__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <stringValue/>
+                <stringValue></stringValue>
             </value>
         </assignmentItems>
         <connector>

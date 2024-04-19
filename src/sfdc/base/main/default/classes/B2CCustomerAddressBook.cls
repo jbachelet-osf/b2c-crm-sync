@@ -28,7 +28,7 @@ public with sharing class B2CCustomerAddressBook {
      */
     @AuraEnabled(cacheable=true)
     public static List<Map<String, String>> getCustomerAddressFormFields() {
-        List<B2C_Integration_Field_Mappings__mdt> fieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing(METADATA_NAME);
+        List<B2C_Integration_Field_Mappings__mdt> fieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing(METADATA_NAME, false);
         List<Map<String, String>> fields = new List<Map<String, String>>();
 
         for (B2C_Integration_Field_Mappings__mdt fieldMapping : fieldMappings) {
@@ -130,7 +130,7 @@ public with sharing class B2CCustomerAddressBook {
         }
 
         JSONParse responseParsedJSON = new JSONParse(res.getBody());
-        return B2CMetaFieldMappings.mapFields(customerId, responseParsedJSON, B2CMetaFieldMappings.getFieldMappingsForPublishing(METADATA_NAME));
+        return B2CMetaFieldMappings.mapFields(customerId, responseParsedJSON, B2CMetaFieldMappings.getFieldMappingsForPublishing(METADATA_NAME, false));
     }
 
     /**
@@ -158,7 +158,7 @@ public with sharing class B2CCustomerAddressBook {
 
         // Build the address object to send to the B2C Commerce instance, based on the field mappings
         Map<String, Object> addressData = new Map<String, Object>();
-        List<B2C_Integration_Field_Mappings__mdt> fieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing(METADATA_NAME);
+        List<B2C_Integration_Field_Mappings__mdt> fieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing(METADATA_NAME, false);
         for (B2C_Integration_Field_Mappings__mdt fieldMapping : fieldMappings) {
             addressData.put(
                 fieldMapping.B2C_Commerce_OCAPI_Attribute__c,

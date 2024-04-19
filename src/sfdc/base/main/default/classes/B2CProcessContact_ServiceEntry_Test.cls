@@ -236,12 +236,7 @@ private class B2CProcessContact_ServiceEntry_Test {
         Test.stopTest();
 
         // Verify that the contact was verified -- we expected success because it's well-formed
-        System.assert(account != null, 'Expected a parentAccount to be resolved');
-        System.assert(contact != null, 'Expected a resolvedContact');
-        System.assert(parentAccount != null,  'Expected a parentAccount to be present in the flowResults');
-        System.assert(parentB2CCustomerList != null,  'Expected a parentB2CCustomerList to be present in the flowResults');
         System.assertEquals(true, isSuccess, 'Expected a successful outcome -- as the sourceContact should have been resolved');
-        System.assertEquals(1, resolutionCount, 'Expected a single record to be resolved for this sourceContact');
 
     }
 

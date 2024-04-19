@@ -6,23 +6,23 @@
  * used to decide how to process updates or inserts
 */
 //noinspection LongLine
-public inherited sharing class B2CIACustomerResolution {
+public inherited sharing class B2CIACustomerResolutionPA {
 
     /**
-     * @description Invocable action to retrieve relevant contact duplicates for standard and person account models
+     * @description Invocable action to retrieve relevant person account duplicates for person account models
      *
-     * @param contactList{List<List<Contact>>} A list of contacts but is expected to have only 1 item.
+     * @param accountsList{List<List<Account>>} A list of person accounts but is expected to have only 1 item.
      * This is to support use within Flow.
      * @return {List<B2CIACustomerResolutionResult>} Returns a list of list of contacts. This is expected to have
      * only 1 item in the main list to support use with Flow.
      */
-    @InvocableMethod(Label='B2C: Customer Resolution' Description='Finds matching contacts based on B2C matching rules')
-    public static List<B2CIACustomerResolutionResult> resolve(List<List<Contact>> contactList) {
+    @InvocableMethod(Label='B2C: Customer Resolution Person Accounts' Description='Finds matching person accounts based on B2C matching rules')
+    public static List<B2CIACustomerResolutionResult> resolve(List<List<Account>> accountList) {
 
         // Initialize local variables
         B2CIACustomerResolutionResult resolutionResults;
         List<B2CIACustomerResolutionResult> output;
-        List<Contact> contactsToResolve;
+        List<Account> accountsToResolve;
 
         // Initialize the output variable
         output = new List<B2CIACustomerResolutionResult>();
@@ -32,35 +32,34 @@ public inherited sharing class B2CIACustomerResolution {
         resolutionResults.isError = false;
 
         // Was the sourceContact collection populated?
-        if (contactList.size() == 0) {
+        if (accountList.size() == 0) {
 
             // If not, indicate an error occurred
             resolutionResults.isError = true;
-            resolutionResults.errorMessage = 'No sourceContactCollection provided to B2CIACustomerResolution class.  ' +
+            resolutionResults.errorMessage = 'No sourcePersonAccountCollection provided to B2CIACustomerResolutionPA class.  ' +
                 'Check your input and please try again.';
 
         } else {
 
             // Get access to the actual list of contact(s) to resolve
-            contactsToResolve = contactList.get(0);
+            accountsToResolve = accountList.get(0);
 
             // Was a contact found in the input parameter?
-            if (contactsToResolve.size() == 0) {
+            if (accountsToResolve.size() == 0) {
 
                 // If not, indicate an error occurred
                 resolutionResults.isError = true;
-                resolutionResults.errorMessage = 'No sourceContact provided to B2CIACustomerResolution class.  ' +
+                resolutionResults.errorMessage = 'No source person account provided to B2CIACustomerResolutionPA class.  ' +
                     'Check your input and please try again.';
 
             } else {
 
                 // Loop over the collection of contacts to resolve
-                for (Contact c: contactsToResolve) {
-
+                for (Account a : accountsToResolve) {
                     try {
 
                         // Add the resolution results to the output class
-                        resolutionResults.contactList = findDupes(c);
+                        resolutionResults.contactList = findDupes(a);
 
                     } catch (System.HandledException e) {
 
@@ -89,31 +88,21 @@ public inherited sharing class B2CIACustomerResolution {
     /**
      * @description Runs B2C duplicate rules, retrieve potential duplicates, and filter through a companion Flow
      *
-     * @param pContact {Contact} A specific contact to run find duplicates on
+     * @param pAccount {Account} A specific person account to run find duplicates on
      * @return {List<Contact>} The final list of contacts that exist that are relevant duplicates
      */
-    public static List<Contact> findDupes(Contact pContact) {
-        System.debug(LoggingLevel.DEBUG, '--> Find dupes for contact :');
-        System.debug(LoggingLevel.DEBUG, pContact);
+    public static List<Contact> findDupes(Account pAccount) {
+        System.debug(LoggingLevel.DEBUG, '--> Find dupes for person account :');
+        System.debug(LoggingLevel.DEBUG, pAccount);
 
         // Initialize local variables
-        List<Contact> contactToResolve = new List<Contact>();
         List<Account> accountToResolve = new List<Account>();
-        List<Contact> matchedContactRecords = new List<Contact>();
         List<Contact> duplicateContactRecords = new List<Contact>();
         List<Account> matchedAccountRecords = new List<Account>();
-        String accountContactModel;
         Datacloud.FindDuplicatesResult[] results;
 
-        contactToResolve.add(pContact.clone(true));
-
-        // Has the lastName been defined?
-        if (!contactToResolve.get(0).isSet('LastName') || contactToResolve.get(0).get('LastName') == null) {
-            // Default the lastName if it's not set -- solely for the purpose of resolution
-            contactToResolve.get(0).put('LastName', B2CConfigurationManager.getDefaultAccountContactNames().get('contactName'));
-        }
-
-        results = Datacloud.FindDuplicates.findDuplicates(contactToResolve);
+        accountToResolve.add(pAccount.clone(true));
+        results = Datacloud.FindDuplicates.findDuplicates(accountToResolve);
 
         System.debug(LoggingLevel.DEBUG, '--> Iterating over DataCloud results (' + results.size() + ')');
 
@@ -146,29 +135,8 @@ public inherited sharing class B2CIACustomerResolution {
 
                             System.debug(LoggingLevel.DEBUG, '--> MatchRecord: ' + dmrI);
 
-                            // Capture the accountContactModel being leveraged
-                            accountContactModel = B2C_CRMSync_Setting__mdt.getInstance(
-                                'Default_Configuration').Account_Contact_Model__c;
-
-                            // Are we using standard contact model and found contacts
-                            if (
-                                dmrI.getRecord().getSObjectType() == Schema.Contact.getSObjectType()
-                                && accountContactModel != B2CConstant.ACCOUNTCONTACTMODEL_PERSON
-                            ) {
-
-                                // If so, add it to the Contact Collection
-                                matchedContactRecords.add((Contact)dmrI.getRecord());
-
-                            // Otherwise, did we find accounts and are using a person account model?
-                            } else if (
-                                dmrI.getRecord().getSObjectType() == Schema.Account.getSObjectType()
-                                && accountContactModel == B2CConstant.ACCOUNTCONTACTMODEL_PERSON
-                            ) {
-
-                                // Add the record to the Account Collection
-                                matchedAccountRecords.add((Account)dmrI.getRecord());
-
-                            }
+                            // Add the record to the Account Collection
+                            matchedAccountRecords.add((Account)dmrI.getRecord());
 
                         }
 
@@ -197,11 +165,6 @@ public inherited sharing class B2CIACustomerResolution {
                 ];
 
             }
-
-        } else {
-
-            // Otherwise, add the matched records to the duplicateCollection
-            duplicateContactRecords.addAll( matchedContactRecords );
 
         }
 

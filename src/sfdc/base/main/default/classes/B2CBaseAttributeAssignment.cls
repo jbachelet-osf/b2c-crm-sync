@@ -123,7 +123,7 @@ public abstract with sharing class B2CBaseAttributeAssignment {
             if (sourceObject.isSet(objectFieldName) && sourceObject.get(objectFieldName) != null) {
 
                 // If so, then evaluate if the targetObject is missing this field -- or it has it, and the value is null
-                if (!targetObjectFields.contains(objectFieldName) || (targetObjectFields.contains(objectFieldName) && targetObject.get(objectFieldName) == null)) {
+                if (doesFieldExist(getSchemaMap(targetObject), objectFieldName) && (!targetObjectFields.contains(objectFieldName) || (targetObjectFields.contains(objectFieldName) && targetObject.get(objectFieldName) == null))) {
 
                     // If the field exists, see if it has been set in the target object
                     if (targetObject.get(objectFieldName) == null) {
@@ -203,6 +203,42 @@ public abstract with sharing class B2CBaseAttributeAssignment {
         // Return the output variable
         return output;
 
+    }
+
+    /**
+     * @description This method translates a Contact into a Person Account.  It does this by leveraging the
+     * field mappings for the contact and account objects.
+     *
+     * @param contact {SObject} Represents the contact to translate
+     * @param contactFieldMappings {List<B2C_Integration_Field_Mappings__mdt>} Represents the collection of field mappings to leverage for the contact
+     * @param accountFieldMappings {List<B2C_Integration_Field_Mappings__mdt>} Represents the collection of field mappings to leverage for the account
+     * @return {Account} Returns the translated contact into a Person Account
+     */
+    public static Account translateContactToPersonAccount(Contact contact, List<B2C_Integration_Field_Mappings__mdt> contactFieldMappings, List<B2C_Integration_Field_Mappings__mdt> accountFieldMappings) {
+        // Person Account Record Type
+        RecordType rt = [SELECT Id, DeveloperName FROM RecordType WHERE DeveloperName = :B2CConfigurationManager.getPersonAccountRecordTypeDeveloperName() WITH SECURITY_ENFORCED];
+        Account a = new Account(
+            RecordTypeId = rt.Id
+        );
+        Map<String, Object> populatedFields = contact.getPopulatedFieldsAsMap();
+
+        // Loop over the contact fieldMappings and evaluate each field
+        for (B2C_Integration_Field_Mappings__mdt thisFieldMapping : contactFieldMappings) {
+            // Compare the attribute values for the original and processed objects
+            if (doesFieldExist(getSchemaMap(a), thisFieldMapping.Service_Cloud_Attribute_Alt__c) && doesFieldExist(getSchemaMap(contact), thisFieldMapping.Service_Cloud_Attribute__c) && populatedFields.containsKey(thisFieldMapping.Service_Cloud_Attribute__c)) {
+                a.put(thisFieldMapping.Service_Cloud_Attribute_Alt__c, contact.get(thisFieldMapping.Service_Cloud_Attribute__c));
+            }
+        }
+
+        // Loop over the account fieldMappings and evaluate each field
+        for (B2C_Integration_Field_Mappings__mdt thisFieldMapping : accountFieldMappings) {
+            // Compare the attribute values for the original and processed objects
+            if (doesFieldExist(getSchemaMap(a), thisFieldMapping.Service_Cloud_Attribute__c) && doesFieldExist(getSchemaMap(contact), thisFieldMapping.Service_Cloud_Attribute__c) && populatedFields.containsKey(thisFieldMapping.Service_Cloud_Attribute__c)) {
+                a.put(thisFieldMapping.Service_Cloud_Attribute__c, contact.get(thisFieldMapping.Service_Cloud_Attribute__c));
+            }
+        }
+
+        return a;
     }
 
     /**

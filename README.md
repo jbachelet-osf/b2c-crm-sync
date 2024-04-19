@@ -11,7 +11,7 @@ Salesforce B2C Commerce / CRM Sync is an enablement solution designed by Salesfo
 
 b2c-crm-sync includes a framework for integrating these clouds (ex. B2C Commerce and Service Cloud) -- leveraging REST APIs and the declarative capabilities of the Salesforce Platform. This approach powers frictionless customer experiences across B2C Commerce, Service, and Marketing Clouds by resolving and synchronizing customer profiles across these Salesforce products.
 
-> :100: &nbsp;This repository is currently in it's **v3.0.0** release. The MVP feature-set is complete, and you can now deploy b2c-crm-sync to scratchOrgs and sandboxes via its CLI tooling. Solution trustworthiness is critical for our success. Please use the tagged release, but also feel free to deploy from master if you want to work with the latest updates. &nbsp;:100:
+> :100: &nbsp;This repository is currently in it's **v3.0.0** release. You can now deploy b2c-crm-sync to scratchOrgs and sandboxes via its CLI tooling. Solution trustworthiness is critical for our success. Please use the tagged release, but also feel free to deploy from master if you want to work with the latest updates. &nbsp;:100:
 
 Please visit our [issues-list](https://github.com/SalesforceCommerceCloud/b2c-crm-sync/issues) to see outstanding issues and features, and visit our [discussions](https://github.com/SalesforceCommerceCloud/b2c-crm-sync/discussions) to ask questions.
 
@@ -23,6 +23,12 @@ b2c-crm-sync enables the resolution, synchronization, viewing, and management of
 > Please note that this integration is an 'above the API' integration achieved via REST services -- and is not a low-level platform integration. Think of this repository as a guide for integrating B2C Commerce and the Salesforce Customer 360 Platform leveraging REST APIs, custom code, and a subset of its declarative features.
 
 b2c-crm-sync leverages Salesforce B2C Commerce Open Commerce REST APIs to interact with B2C Customer Profiles -- and a Salesforce Platform REST API to 'announce' when shoppers register or modify B2C Commerce Customer Profiles. Through these announcements, the Salesforce Platform requests the identified data objects (ex. customers) via REST APIs -- and then ingests elements of those data objects to create Account / Contact or PersonAccount representations of B2C Commerce Customer Profiles.
+
+Please find hereafter diagrams that shows how b2c-crm-sync is synching customer profile profiles in a bidirectional way:
+
+![B2C To Core Diagram](docs/imgs/B2CtoCore.png "B2C To Core Diagram")
+
+![Core To B2C Diagram](docs/imgs/CoretoB2C.png "Core To B2C Diagram")
 
 ### License
 This project, its source code, and sample assets are all licensed under the [BSD 3-Clause](License.md) License.
@@ -55,6 +61,20 @@ b2c-crm-sync supports the following extensible features (yes, you can customize 
 - Headless Support for synchronization and order attribution use-cases
 
 > We leverage [Salesforce SFDX for Deployment](https://trailhead.salesforce.com/content/learn/modules/sfdx_app_dev), [Flow for Automation](https://trailhead.salesforce.com/en/content/learn/modules/flow-builder), [Platform Events for Messaging](https://trailhead.salesforce.com/en/content/learn/modules/platform_events_basics), [Salesforce Connect for Data Federation](https://trailhead.salesforce.com/en/content/learn/projects/quickstart-lightning-connect), and [Apex Invocable Actions](https://trailhead.salesforce.com/en/content/learn/projects/quick-start-explore-the-automation-comps-sample-app) to support these features. If you're a B2C Commerce Architect interested in learning how to integrate with the Salesforce Platform -- this is the project for you :)
+
+### Account-level attribute matching & mapping
+
+Starting since v4.0.0, we introduced a new level of data matching and data mapping between B2C Commerce and the Salesforce Core Platform.
+As some business requirements make fields declared at the Account level within the Core platform, and some other fields declared at the Contact level, we introduced a new level of data mapping that allows you to map fields from B2C Commerce to either the Account or the Contact level within the Core Platform.
+Of course, this new feature makes way more sense when you are using PersonAccounts within the Salesforce Core Platform, as both the Account & Contact records are merged under the hood.
+
+As a schema is always easier to understand than a thousand words, please have a look at the following schema to understand how the B2C Commerce Customer Profile data is matched into the Core Platform:
+
+![B2C To Core - Account Level Mapping Diagram](docs/imgs/B2CtoCore-AccountLevelMapping.png "B2C To Core - Account Level Mapping Diagram")
+
+In order to configure account-level mapping attributes, please create a new `B2C_Integration_Field_Mappings` custom metadata with the value `Account` into the `Service_Cloud_Object__c` field.
+
+> Please note that due to this new feature: the Contact duplicate rule is not not used anymore if you enable the `PersonAccount` model. It is only used by the unit tests, and thus is still required to be enabled. This happens because, if you are enabling the `PersonAccount` and have at least one account-level mapping, then b2c-crm-sync is using a person account record instead of a contact to resolve the customer profile and map data to it.
 
 ## Setup Guidance
 
@@ -969,6 +989,12 @@ npm run crm-sync:sf:connectedapps
 ```
 This command creates a connectedApp for each of the B2C Commerce storefronts configured in your .env file. The B2C Commerce service definitions used to connect with your Salesforce Org use these connectedApps to connect securely.
 
+> b2c-crm-sync use Username-password flows, which are blocked by default in orgs created in Summer ‘23 or later. make sure to activate it if it's not activated already
+- Go to settings
+- in the search, look for OAuth
+- select OAuth and OpenID Connect Settings under identity
+- Turn on `Allow OAuth Username-Password Flows`
+
 #### Create and Deploy Your Duplicate Rules
 16. Duplicate rules can be configured and deployed via a CLI command that retrieves the duplicateRules configuration in the Salesforce Org, identifies which b2c-crm-sync rules already exist, and creates the rule templates to deploy. Please execute this CLI command to create and deploy duplicateRules:
 
@@ -1440,7 +1466,7 @@ As the B2C Commerce customer profile and its addresses are fetched by the core p
 3. In the Quick Find box at the top left, search for `Custom Metadata` and click on this menu
 4. Click on the `Manage records` on the row `B2C Integration Field Mapping`
 5. You'll find all the data mapping here, that you can modify, remove, or add new attributes as part of the data mapping.
-
+6. Please note that the data mapping provided here is based on standard fields. It is up to you to add/remove/update mappings based on the business requirements.
 
 | Label               | Core Object            | Core ID                    | Core Alt ID                 | B2C Object      | OCAPI ID            |
 |:-------------------:|:----------------------:|:--------------------------:|:---------------------------:|:---------------:|:-------------------:|

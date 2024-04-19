@@ -20,51 +20,53 @@ public with sharing class B2CIAPublishCustomerProfile extends B2CBaseAttributeAs
 
         // Initialize local variables
         Contact thisCustomerProfile;
+        Account thisCustomerProfileAccount;
         SObject thisCustomerProfileToUpdate;
         Integer totalUpdates;
         Map<String, Object> thisB2CProfile;
-        List<SObject> contactsToUpdate;
-        List<B2C_Integration_Field_Mappings__mdt> fieldMappings;
-        List<B2CIAPublishCustomerProfileResult> output;
+        List<SObject> contactsToUpdate = new List<SObject>();
+        // Get the fieldMappings for the customerProfile object
+        List<B2C_Integration_Field_Mappings__mdt> contactFieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing('Contact', false);
+        List<B2C_Integration_Field_Mappings__mdt> accountFieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing('Account', true);
+        List<B2CIAPublishCustomerProfileResult> output = new List<B2CIAPublishCustomerProfileResult>();
         B2CIAPublishCustomerProfileResult customerPublishResult;
         String thisB2CProfileJSON;
         JSONParse parsedJSON;
         JSONParse parsedBodyJSON;
-        String accountContactModel;
+        // Start by retrieving the default account / contactModel
+        String accountContactModel = B2CConfigurationManager.getDefaultAccountContactModel();
 
         // Initialize the request properties
         HttpRequest req;
         Http https;
         HttpResponse res;
 
-        // Start by retrieving the default account / contactModel
-        accountContactModel = B2CConfigurationManager.getDefaultAccountContactModel();
-
-        // Initialize the output variable
-        output = new List<B2CIAPublishCustomerProfileResult>();
-        contactsToUpdate = new List<Contact>();
-
-        // Get the fieldMappings for the customerProfile object
-        fieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing('Contact');
-
         // Iterate over the collection of customerProfile results
         for (B2CIAPublishCustomerProfileInput requestInput : requestArguments) {
 
             // Create a reference to the current CRM Contact
             thisCustomerProfile = requestInput.crmContact;
-
-            // If not, get the publish profile for the current contact record
-            thisB2CProfile = B2CContactManager.getPublishProfile(thisCustomerProfile, fieldMappings);
-
-            // Serialize the B2C Profile as a JSON object
-            thisB2CProfileJSON = JSON.serializePretty(thisB2CProfile, true);
+            String accountId = (String)thisCustomerProfile.AccountId;
+            if (!String.isEmpty(accountId)) {
+                thisCustomerProfileAccount = B2CContactAccountManager.getAccountById(accountId, true, accountFieldMappings);
+            }
 
             // Was a pre-defined profileJSON included in the event?
             if (requestInput.b2cProfileJSON != null && requestInput.b2cProfileJSON.length() > 0) {
 
                 // Otherwise, leverage the pre-defined profileJSON in the response
                 thisB2CProfileJSON = requestInput.b2cProfileJSON;
+            } else {
+                // If the account record was found, add up the account-based fields too
+                if (thisCustomerProfileAccount != null) {
+                    thisB2CProfile = B2CContactAccountManager.getPublishProfile(thisCustomerProfileAccount, accountFieldMappings, B2CContactManager.getPublishProfile(thisCustomerProfile, contactFieldMappings));
+                } else {
+                    // If not, get the publish profile for the current contact record
+                    thisB2CProfile = B2CContactManager.getPublishProfile(thisCustomerProfile, contactFieldMappings);
+                }
 
+                // Serialize the B2C Profile as a JSON object
+                thisB2CProfileJSON = JSON.serializePretty(thisB2CProfile, true);
             }
 
             // Build the request object utilizing the input properties

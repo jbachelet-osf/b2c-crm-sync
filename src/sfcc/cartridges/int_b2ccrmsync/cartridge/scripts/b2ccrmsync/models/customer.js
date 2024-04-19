@@ -68,7 +68,9 @@ Customer.prototype = {
     getRequestBody: function (profileDetails) {
         return JSON.stringify({
             inputs: [{
-                sourceContact: profileDetails || this.profileRequestObjectRepresentation
+                sourceInput: {
+                    jsonRepresentation: JSON.stringify(profileDetails || this.profileRequestObjectRepresentation)
+                }
             }]
         });
     },

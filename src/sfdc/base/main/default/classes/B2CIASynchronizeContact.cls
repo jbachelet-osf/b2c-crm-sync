@@ -39,9 +39,8 @@ public with sharing class B2CIASynchronizeContact extends B2CBaseAttributeAssign
         // Loop over the collection of input results
         for (B2CIASynchronizeContactInput contactToProcess: contactsToProcess) {
 
-            // First, convert the contacts to sObjects
-            sourceContact = (SObject) contactToProcess.sourceContact;
-            targetContact = (SObject) contactToProcess.targetContact;
+            sourceContact = contactToProcess.sourceContact;
+            targetContact = contactToProcess.targetContact;
             clonedTargetContact = targetContact.clone(true, true);
 
             // Audit the source / target contacts before processing takes place

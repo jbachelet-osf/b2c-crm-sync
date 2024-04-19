@@ -29,7 +29,7 @@ public with sharing class B2CIAGetContact extends B2CBaseAttributeAssignment {
         output = new List<B2CIAGetContactResult>();
 
         // Retrieve the fieldMappings to leverage based on the Account / Contact Model being employed
-        fieldMappings = B2CMetaFieldMappings.getFieldMappingsForRetrieval('Contact');
+        fieldMappings = B2CMetaFieldMappings.getFieldMappingsForRetrieval('Contact', false);
 
         // Loop over the collection of site details
         for (B2CIAGetContactInput requestInput: requestArguments) {

@@ -4,8 +4,8 @@
         <description>... attempt to resolve the B2C Customer profile leveraging the Customer Resolution Invocable Action.</description>
         <name>ia_resolveB2CCustomerProfile</name>
         <label>Attempt to Resolve the B2C Customer Profile</label>
-        <locationX>852</locationX>
-        <locationY>710</locationY>
+        <locationX>495</locationX>
+        <locationY>866</locationY>
         <actionName>B2CIACustomerResolution</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -31,13 +31,44 @@
             <name>isError</name>
         </outputParameters>
     </actionCalls>
+    <actionCalls>
+        <description>... attempt to resolve the B2C Customer profile leveraging the Customer Resolution Invocable Action.</description>
+        <name>ia_resolveB2CCustomerProfilePA</name>
+        <label>Attempt to Resolve the B2C Customer Profile</label>
+        <locationX>231</locationX>
+        <locationY>866</locationY>
+        <actionName>B2CIACustomerResolutionPA</actionName>
+        <actionType>apex</actionType>
+        <connector>
+            <targetReference>dec_wasResolutionErrorCaught</targetReference>
+        </connector>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>accountList</name>
+            <value>
+                <elementReference>var_recColPersonAccountsToResolve</elementReference>
+            </value>
+        </inputParameters>
+        <outputParameters>
+            <assignToReference>var_recColResolvedContacts</assignToReference>
+            <name>contactList</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>var_resolutionErrorMessage</assignToReference>
+            <name>errorMessage</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>var_resolutionError</assignToReference>
+            <name>isError</name>
+        </outputParameters>
+    </actionCalls>
     <apiVersion>54.0</apiVersion>
     <assignments>
         <description>... add the Contact to resolve to the collection being processed.</description>
         <name>asn_contactToContactCollection</name>
         <label>Create the Resolution Collection</label>
-        <locationX>852</locationX>
-        <locationY>504</locationY>
+        <locationX>495</locationX>
+        <locationY>758</locationY>
         <assignmentItems>
             <assignToReference>var_recColContactsToResolve</assignToReference>
             <operator>Add</operator>
@@ -53,8 +84,8 @@
         <description>... capture an error message indicating that multiple Contact records were resolved.</description>
         <name>asn_errorMultipleContacts</name>
         <label>Error: Multiple Contacts Resolved</label>
-        <locationX>1320</locationX>
-        <locationY>1869</locationY>
+        <locationX>1106</locationX>
+        <locationY>1598</locationY>
         <assignmentItems>
             <assignToReference>var_errorMessage</assignToReference>
             <operator>Assign</operator>
@@ -74,8 +105,8 @@
         <description>... no Contact was successfully resolved.</description>
         <name>asn_errorNoContactResolved</name>
         <label>Error: No Contact Was Resolved</label>
-        <locationX>858</locationX>
-        <locationY>2535</locationY>
+        <locationX>842</locationX>
+        <locationY>2006</locationY>
         <assignmentItems>
             <assignToReference>var_isSuccess</assignToReference>
             <operator>Assign</operator>
@@ -102,8 +133,8 @@
         <description>... update the success flag to denote that resolution was successful; a single contact was resolved.</description>
         <name>asn_resolutionSuccessful</name>
         <label>Resolution Was Successful</label>
-        <locationX>1324</locationX>
-        <locationY>2296</locationY>
+        <locationX>578</locationX>
+        <locationY>2114</locationY>
         <assignmentItems>
             <assignToReference>var_isSuccess</assignToReference>
             <operator>Assign</operator>
@@ -130,8 +161,8 @@
         <description>... capture the count of resolved Contacts driven by the Resolution action.</description>
         <name>asn_ResolvedContactsCount</name>
         <label>Capture the Count of Resolution Contacts</label>
-        <locationX>854</locationX>
-        <locationY>1655</locationY>
+        <locationX>1040</locationX>
+        <locationY>1382</locationY>
         <assignmentItems>
             <assignToReference>var_resolvedContactCount</assignToReference>
             <operator>AssignCount</operator>
@@ -154,8 +185,8 @@
         <description>... assign the resolved Contact to the output variable for processing.</description>
         <name>asn_resolvedContactToOutputVariable</name>
         <label>Assign First Resolved Contact</label>
-        <locationX>1114</locationX>
-        <locationY>2036</locationY>
+        <locationX>798</locationX>
+        <locationY>1706</locationY>
         <assignmentItems>
             <assignToReference>var_resolvedContact</assignToReference>
             <operator>Assign</operator>
@@ -168,10 +199,27 @@
         </connector>
     </assignments>
     <assignments>
+        <description>... add the Person Account to resolve to the collection being processed.</description>
+        <name>Create_the_Resolution_Collection_PA</name>
+        <label>Create the Resolution Collection</label>
+        <locationX>231</locationX>
+        <locationY>758</locationY>
+        <assignmentItems>
+            <assignToReference>var_recColPersonAccountsToResolve</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>var_personAccountToResolve</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>ia_resolveB2CCustomerProfilePA</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
         <name>Error_Contact_Filter</name>
         <label>Error: Contact Filter</label>
-        <locationX>1305</locationX>
-        <locationY>1402</locationY>
+        <locationX>314</locationX>
+        <locationY>1382</locationY>
         <assignmentItems>
             <assignToReference>var_errorMessage</assignToReference>
             <operator>Add</operator>
@@ -197,8 +245,8 @@
     <assignments>
         <name>Error_No_Contact_Resolved</name>
         <label>Error: No Contact Resolved</label>
-        <locationX>500</locationX>
-        <locationY>1870</locationY>
+        <locationX>1370</locationX>
+        <locationY>1598</locationY>
         <assignmentItems>
             <assignToReference>var_isSuccess</assignToReference>
             <operator>Assign</operator>
@@ -217,8 +265,8 @@
     <assignments>
         <name>Error_Resolution_Exception</name>
         <label>Error: Resolution Exception</label>
-        <locationX>1295</locationX>
-        <locationY>906</locationY>
+        <locationX>50</locationX>
+        <locationY>1166</locationY>
         <assignmentItems>
             <assignToReference>var_errorMessage</assignToReference>
             <operator>Assign</operator>
@@ -242,11 +290,43 @@
         </assignmentItems>
     </assignments>
     <decisions>
+        <name>Are_PersonAccounts_enabled</name>
+        <label>Are PersonAccounts enabled?</label>
+        <locationX>363</locationX>
+        <locationY>650</locationY>
+        <defaultConnector>
+            <targetReference>asn_contactToContactCollection</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Standard model</defaultConnectorLabel>
+        <rules>
+            <name>Person_Accounts_enabled</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>recGet_defaultConfiguration.Account_Contact_Model__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>Person</stringValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>var_personAccountToResolve</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Create_the_Resolution_Collection_PA</targetReference>
+            </connector>
+            <label>Person Accounts enabled</label>
+        </rules>
+    </decisions>
+    <decisions>
         <description>... evaluate if the resolvedContact has an ID value.</description>
         <name>dec_doesResolvedContactHaveID</name>
         <label>Does the Contact Have an ID?</label>
-        <locationX>849</locationX>
-        <locationY>2297</locationY>
+        <locationX>710</locationX>
+        <locationY>1898</locationY>
         <defaultConnector>
             <targetReference>asn_errorNoContactResolved</targetReference>
         </defaultConnector>
@@ -271,10 +351,10 @@
         <description>... evaluate if QA Mode is enabled</description>
         <name>dec_isQAModeEnabled</name>
         <label>Is QA Mode Enabled?</label>
-        <locationX>843</locationX>
-        <locationY>255</locationY>
+        <locationX>363</locationX>
+        <locationY>134</locationY>
         <defaultConnector>
-            <targetReference>asn_contactToContactCollection</targetReference>
+            <targetReference>recGet_IdentifyDefaultConfiguration</targetReference>
         </defaultConnector>
         <defaultConnectorLabel>Not Enabled</defaultConnectorLabel>
         <rules>
@@ -297,8 +377,8 @@
         <description>... evaluate if a single Contact was resolved</description>
         <name>dec_wasOneContactResolved</name>
         <label>Was Only One Contact Resolved?</label>
-        <locationX>846</locationX>
-        <locationY>1872</locationY>
+        <locationX>1040</locationX>
+        <locationY>1490</locationY>
         <defaultConnector>
             <targetReference>Error_No_Contact_Resolved</targetReference>
         </defaultConnector>
@@ -338,8 +418,8 @@
         <description>... check if a resolution error was caught (ex. duplicate rules are inactive or unavailable)</description>
         <name>dec_wasResolutionErrorCaught</name>
         <label>Was An Error Caught During Resolution?</label>
-        <locationX>844</locationX>
-        <locationY>910</locationY>
+        <locationX>363</locationX>
+        <locationY>1058</locationY>
         <defaultConnector>
             <targetReference>ContactFilterMatches_Subflow</targetReference>
         </defaultConnector>
@@ -363,8 +443,8 @@
     <decisions>
         <name>Was_There_An_Error_In_Filtering</name>
         <label>Was There An Error In Filtering?</label>
-        <locationX>845</locationX>
-        <locationY>1405</locationY>
+        <locationX>677</locationX>
+        <locationY>1274</locationY>
         <defaultConnector>
             <targetReference>asn_ResolvedContactsCount</targetReference>
         </defaultConnector>
@@ -386,14 +466,15 @@
         </rules>
     </decisions>
     <description>... encapsulates the Contact Resolution logic for re-use and implementation simplification.</description>
+    <environments>Default</environments>
     <interviewLabel>B2C Commerce: Process: Contact Resolution Helper {!$Flow.CurrentDateTime}</interviewLabel>
     <label>B2C Commerce: Process: Contact Resolution Helper</label>
     <loops>
         <description>... iterate over the collection of resolved Contacts to retrieve the specific / resolved Contact Record.</description>
         <name>loop_retrieveResolvedContact</name>
         <label>Iterate and Retrieve the Resolved Contact</label>
-        <locationX>856</locationX>
-        <locationY>2036</locationY>
+        <locationX>710</locationX>
+        <locationY>1598</locationY>
         <collectionReference>ContactFilterMatches_Subflow.ContactMatchesResult</collectionReference>
         <iterationOrder>Asc</iterationOrder>
         <nextValueConnector>
@@ -412,7 +493,7 @@
     <processMetadataValues>
         <name>CanvasMode</name>
         <value>
-            <stringValue>FREE_FORM_CANVAS</stringValue>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
         </value>
     </processMetadataValues>
     <processMetadataValues>
@@ -423,11 +504,47 @@
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
     <recordLookups>
+        <description>... retrieve the defaultConfiguration for the current b2c-crm-sync instance.</description>
+        <name>recGet_defaultConfiguration</name>
+        <label>Get the Default Configuration</label>
+        <locationX>363</locationX>
+        <locationY>542</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Are_PersonAccounts_enabled</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>recGet_IdentifyDefaultConfiguration.Active_Configuration__c</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>B2C_CRMSync_Setting__mdt</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <description>... identify which b2c-crm-sync configuration profile is being used as the default.</description>
+        <name>recGet_IdentifyDefaultConfiguration</name>
+        <label>Identify the Default Configuration</label>
+        <locationX>363</locationX>
+        <locationY>434</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>recGet_defaultConfiguration</targetReference>
+        </connector>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>B2C_CRM_Sync_Default_Configuration__mdt</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
         <description>... retrieve the Contact and all of its properties for downstream use.</description>
         <name>recGet_resolvedContact</name>
         <label>Retrieve the Full Contact Details</label>
-        <locationX>1120</locationX>
-        <locationY>2296</locationY>
+        <locationX>578</locationX>
+        <locationY>2006</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>asn_resolutionSuccessful</targetReference>
@@ -445,8 +562,8 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <start>
-        <locationX>725</locationX>
-        <locationY>30</locationY>
+        <locationX>237</locationX>
+        <locationY>0</locationY>
         <connector>
             <targetReference>dec_isQAModeEnabled</targetReference>
         </connector>
@@ -456,8 +573,8 @@
         <description>... iterate over the collection of returnedResults and pick a winner driven by our resolutionRules.</description>
         <name>ContactFilterMatches_Subflow</name>
         <label>Filter Matches and Pick a Winner</label>
-        <locationX>853</locationX>
-        <locationY>1190</locationY>
+        <locationX>677</locationX>
+        <locationY>1166</locationY>
         <connector>
             <targetReference>Was_There_An_Error_In_Filtering</targetReference>
         </connector>
@@ -480,10 +597,10 @@
         <description>... overwrite the contactToResolve value with the QA override.</description>
         <name>sub_overwriteContactToResolve</name>
         <label>Overwrite the Contact to Resolve</label>
-        <locationX>598</locationX>
-        <locationY>504</locationY>
+        <locationX>231</locationX>
+        <locationY>242</locationY>
         <connector>
-            <targetReference>asn_contactToContactCollection</targetReference>
+            <targetReference>recGet_IdentifyDefaultConfiguration</targetReference>
         </connector>
         <flowName>B2CCommerce_Process_QAModeHelper</flowName>
         <inputAssignments>
@@ -554,6 +671,14 @@
         <value>
             <booleanValue>false</booleanValue>
         </value>
+    </variables>
+    <variables>
+        <name>var_personAccountToResolve</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Account</objectType>
     </variables>
     <variables>
         <description>... represents the B2C Customer ID used to test the Customer Resolution sub-flow.</description>
@@ -631,6 +756,14 @@
         <isInput>false</isInput>
         <isOutput>false</isOutput>
         <objectType>Contact</objectType>
+    </variables>
+    <variables>
+        <name>var_recColPersonAccountsToResolve</name>
+        <dataType>SObject</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Account</objectType>
     </variables>
     <variables>
         <description>... represents the collection of resolvedContacts.</description>

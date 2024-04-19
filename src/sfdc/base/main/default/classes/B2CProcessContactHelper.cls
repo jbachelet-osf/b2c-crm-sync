@@ -32,7 +32,7 @@ public with sharing class B2CProcessContactHelper extends B2CBaseAttributeAssign
         List<B2C_Commerce_ProcessCustomerDetails__e> peCollection;
 
         // Get the fieldMappings for the customerProfile object
-        fieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing('Contact');
+        fieldMappings = B2CMetaFieldMappings.getFieldMappingsForPublishing('Contact', false);
 
         // Only process the trigger if publish-friendly fieldMappings are found
         if (fieldMappings.size() > 0) {
